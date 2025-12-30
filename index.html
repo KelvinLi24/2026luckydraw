@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>2026 倒數交換禮物抽獎</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>2026 倒數交換禮物抽獎</h1>
+        </div>
+      </div>
+
+      <div class="rightHeader">
+        <div class="countdown" title="倒數至 2026-01-01 00:00 (Asia/Taipei)">
+          <span class="label">距離 2026-01-01</span>
+          <span class="time" id="countdown">--:--:--</span>
+        </div>
+        <button class="btn danger" id="btnGlobalReset" title="危險操作：清空所有進度">全局重置</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- STEP 1 -->
+    <section class="card" id="step1Card">
+      <div class="hd">
+        <div>
+          <h2>1) 輸入參與者（逐個輸入）</h2>
+          <div class="sub">輸入一個名字 → 按「確定」加入。完成輸入後按「完成輸入所有人」先會顯示下一步。</div>
+        </div>
+        <span class="pill"><span class="muted">目前人數</span> <b id="countAll">0</b></span>
+      </div>
+
+      <div class="bd">
+        <div class="row">
+          <input class="input" id="singleNameInput" placeholder="輸入名字（例如：Kelvin）" />
+          <button class="btn primary" id="btnAddName">確定</button>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn warn" id="btnFinishInput" disabled>完成輸入所有人</button>
+          <button class="btn danger" id="resetStep1">本步重置</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div class="pool">
+            <div class="ttl">
+              <span>Participant Pool</span>
+              <span class="pill"><span class="muted">剩餘</span> <b id="pCount">0</b></span>
+            </div>
+            <div class="list" id="participantPool"></div>
+          </div>
+
+          <div class="pool">
+            <div class="ttl">
+              <span>Gift Pool</span>
+              <span class="pill"><span class="muted">剩餘</span> <b id="gCount">0</b></span>
+            </div>
+            <div class="list" id="giftPool"></div>
+          </div>
+        </div>
+
+        <div class="hintLine" id="step1Hint">提示：至少 2 個人先可以進入下一步。</div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="card hidden" id="step2Card">
+      <div class="hd">
+        <div>
+          <h2>2) 選擇抽獎順序模式</h2>
+          <div class="sub">隨機可無限按；第二次起彈窗確認。手動：把人名加入順序池並拖曳排序；全部人入池後「確認」先可按。</div>
+        </div>
+        <span class="pill"><span class="muted">順序狀態</span> <b id="orderStatus">未設定</b></span>
+      </div>
+
+      <div class="bd">
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn" id="backToStep1">⬅ 回到上一步</button>
+          <button class="btn danger" id="resetStep2">本步重置</button>
+        </div>
+
+        <div class="modeRow">
+          <div class="toggle" title="選擇順序模式">
+            <button id="modeRandom" class="active" type="button">隨機</button>
+            <button id="modeManual" type="button">手動</button>
+          </div>
+
+          <button class="btn warn" id="btnRandomize">生成隨機順序</button>
+          <span class="pill"><span class="muted">已選順序</span> <b id="orderCount">0</b></span>
+        </div>
+
+        <div class="orderPreview">
+          <h4>抽獎順序名單</h4>
+          <ol id="orderPreviewList"></ol>
+          <div class="muted tiny" id="orderPreviewHint">尚未生成／確認順序。</div>
+        </div>
+
+        <div class="manualArea" id="manualArea">
+          <div class="manualGrids">
+            <div class="bucket">
+              <div class="ttl">
+                <span>選擇池（點名字加入順序池）</span>
+                <span class="pill"><span class="muted">可選</span> <b id="manualPickCount">0</b></span>
+              </div>
+              <div class="list" id="manualPickPool"></div>
+            </div>
+
+            <div class="bucket">
+              <div class="ttl">
+                <span>順序池（可拖曳排序）</span>
+                <span class="pill"><span class="muted">已入池</span> <b id="manualOrderCount">0</b></span>
+              </div>
+              <div class="orderList" id="manualOrderList"></div>
+
+              <div class="row" style="margin-top:10px">
+                <button class="btn good" id="btnConfirmManual" disabled>確認順序</button>
+                <button class="btn" id="btnResetManual">重置順序池</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button class="btn primary" id="btnStartStage3" disabled>開始抽獎環節</button>
+          <span class="pill"><span class="muted">提示</span> <b id="step2Hint">請先設定抽獎順序</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="card hidden" id="step3Card">
+      <div class="stageTop">
+        <div class="left">
+          <div class="big">3) 抽獎環節</div>
+          <div class="small" id="stageDesc"></div>
+        </div>
+        <div class="right">
+          <span class="pill"><span class="muted">進度</span> <b id="progress">0/0</b></span>
+          <span class="pill"><span class="muted">顯示</span> <b id="drawModeLabel">未開始</b></span>
+        </div>
+      </div>
+
+      <div class="canvasWrap">
+        <div class="drawPanel">
+          <div class="row" style="margin-bottom:10px">
+            <button class="btn" id="backToStep2">⬅ 回到上一步</button>
+            <button class="btn danger" id="resetStep3">本步重置</button>
+          </div>
+
+          <div class="drawModes">
+            <div class="toggle" title="顯示方式（本輪開始後會鎖定）">
+              <button id="viewWheel" class="active" type="button">轉盤模式</button>
+              <button id="viewFlash" type="button">閃名模式</button>
+            </div>
+            <span class="pill"><span class="muted">Gift Pool</span> <b id="giftLeftLabel">0</b></span>
+          </div>
+
+          <div class="centerBox">
+            <div class="wheelPointer" id="wheelPointer"></div>
+            <canvas id="wheel" width="640" height="640"></canvas>
+
+            <div class="flashBox" id="flashBox">
+              <div class="flashName" id="flashName">—</div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <button class="btn warn" id="btnSpin" disabled>開始</button>
+            <button class="btn good" id="btnDone" disabled>完成此輪</button>
+
+            <div class="nextInfo">
+              <button class="btn" id="btnNext" disabled>下一位抽獎人</button>
+              <span class="pill"><span class="muted">下一位</span> <b id="nextName">—</b></span>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="grid2">
+            <div class="pool compact">
+              <div class="ttl">
+                <span>抽獎順序名單</span>
+                <span class="pill"><span class="muted">剩餘</span> <b id="orderLiveCount">0</b></span>
+              </div>
+              <div class="orderLive" id="orderLiveList"></div>
+            </div>
+
+            <div class="pool compact">
+              <div class="ttl">
+                <span>當前 Gift Pool 名單</span>
+                <span class="pill"><span class="muted">可抽</span> <b id="giftLiveCount">0</b></span>
+              </div>
+              <div class="list" id="giftLiveList"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidePanel">
+          <div class="kpi">
+            <span class="pill"><span class="muted">Participant 剩餘</span> <b id="pLeft">0</b></span>
+            <span class="pill"><span class="muted">Gift 剩餘</span> <b id="gLeft">0</b></span>
+          </div>
+
+          <div class="nowTurn">
+            <p class="who" id="currentPicker">未開始</p>
+            <p class="hint" id="currentHint">按「開始」開始旋轉/閃名，之後按「停止」減速停定。</p>
+          </div>
+
+          <div class="resultBox" id="resultBox">
+            <p class="big" id="resultBig">—</p>
+            <p class="small" id="resultSmall">—</p>
+          </div>
+
+          <div class="doneList">
+            <h3>已完成抽獎列表</h3>
+            <div class="doneItems" id="doneItems"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL -->
+    <section class="card hidden" id="finalCard">
+      <div class="hd">
+        <div>
+          <h2>🎁 最終交換禮物名單</h2>
+          <div class="sub">（以下為最終結果；煙花會一直播放）</div>
+        </div>
+        <span class="pill"><span class="muted">完成</span> <b id="finalCount">0</b></span>
+      </div>
+
+      <div class="bd">
+        <div class="finalGrid">
+          <div class="finalBox">
+            <h3>最終名單</h3>
+            <ul id="finalList" class="finalList"></ul>
+          </div>
+
+          <div class="finalBox">
+            <h3>提示</h3>
+            <p class="muted" style="margin:0;line-height:1.5">
+              你可以用右上角「全局重置」重新開始下一場活動。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Full-page fireworks overlay -->
+  <canvas id="fireworksOverlay" class="fireworksOverlay" aria-hidden="true"></canvas>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="footer">
+    © 2025 Kelvin Li. All rights reserved.
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
