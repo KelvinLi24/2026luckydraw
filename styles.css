@@ -501,6 +501,7 @@ canvas#wheel{
   flex-wrap:wrap;
 }
 
+/* ✅ sidePanel flex column: for correct scrollbar behavior */
 .sidePanel{
   background: rgba(10,12,22,.45);
   border:1px solid var(--line);
@@ -511,6 +512,7 @@ canvas#wheel{
   display:flex;
   flex-direction:column;
 }
+
 .kpi{
   display:flex;
   gap:10px;
@@ -559,6 +561,7 @@ canvas#wheel{
   line-height:1.35;
 }
 
+/* ✅ done list fills remaining height, scrollbar only when needed */
 .doneList{
   margin-top:12px;
 
@@ -583,6 +586,7 @@ canvas#wheel{
   overflow:auto;
   padding-right:4px;
 }
+
 .doneItem{
   padding:10px 12px;
   border-radius:14px;

@@ -216,7 +216,7 @@
   }
 
   // =========================
-  // Order preview list (Step2)
+  // Order preview list (Step2) ✅ fix double numbering
   // =========================
   function renderOrderPreview() {
     const ol = $("#orderPreviewList");
@@ -229,11 +229,11 @@
     }
     if (hint) hint.textContent = "";
 
-    // ✅ only one numbering
+    // ✅ only show name, numbering by <ol>
     state.drawOrder.forEach((name) => {
-    const li = document.createElement("li");
-    li.textContent = name;
-    ol.appendChild(li);
+      const li = document.createElement("li");
+      li.textContent = name;
+      ol.appendChild(li);
     });
   }
 
@@ -377,7 +377,7 @@
         return mapping;
       }
     }
-    // fallback: Sattolo-like shuffle
+    // fallback shuffle
     const a = names.slice();
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * i);
@@ -504,7 +504,7 @@
   }
 
   // =========================
-  // Fireworks overlay
+  // Fireworks overlay + Final control (30s + toggle)
   // =========================
   const fw = {
     canvas: $("#fireworksOverlay"),
@@ -514,6 +514,18 @@
     until: 0,
     infinite: false
   };
+
+  const FINAL_FW_SECONDS = 30;
+  let fwAutoStopTimer = null;
+  let fwIsRunning = false;
+
+  function setFireworksButtonLabel() {
+    const btn = $("#btnToggleFireworks");
+    if (!btn) return;
+    btn.textContent = fwIsRunning ? "停止煙花" : "開始煙花";
+    btn.classList.toggle("warn", fwIsRunning);
+    btn.classList.toggle("good", !fwIsRunning);
+  }
 
   function resizeFW() {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
@@ -544,6 +556,15 @@
   function startFireworks(seconds) {
     resizeFW();
     fw.canvas.classList.add("show");
+
+    if (fwAutoStopTimer) {
+      clearTimeout(fwAutoStopTimer);
+      fwAutoStopTimer = null;
+    }
+
+    fwIsRunning = true;
+    setFireworksButtonLabel();
+
     fw.particles = [];
     fw.infinite = (seconds === Infinity);
     fw.until = fw.infinite ? 0 : (performance.now() + seconds * 1000);
@@ -555,6 +576,14 @@
   }
 
   function stopFireworks() {
+    if (fwAutoStopTimer) {
+      clearTimeout(fwAutoStopTimer);
+      fwAutoStopTimer = null;
+    }
+
+    fwIsRunning = false;
+    setFireworksButtonLabel();
+
     if (fw.raf) cancelAnimationFrame(fw.raf);
     fw.raf = null;
     fw.particles = [];
@@ -907,7 +936,7 @@
   }
 
   // =========================
-  // Final page
+  // Final page (auto 30s + toggle button)
   // =========================
   function showFinal() {
     showStep(4);
@@ -922,7 +951,15 @@
       ul.appendChild(li);
     });
 
-    startFireworks(Infinity);
+    // ✅ auto play 30 seconds
+    startFireworks(FINAL_FW_SECONDS);
+
+    if (fwAutoStopTimer) clearTimeout(fwAutoStopTimer);
+    fwAutoStopTimer = setTimeout(() => {
+      stopFireworks();
+    }, (FINAL_FW_SECONDS * 1000) + 400);
+
+    setFireworksButtonLabel();
     toast("🎉 全部完成！");
   }
 
@@ -1257,7 +1294,23 @@
   $("#btnSpin").addEventListener("click", onSpinButtonClick);
   $("#btnDone").addEventListener("click", () => finishThisRound());
 
-  $("#btnNext").addEventListener("click", () => {});
+  // ✅ Final toggle fireworks button (single button)
+  const btnToggleFw = $("#btnToggleFireworks");
+  if (btnToggleFw) {
+    btnToggleFw.addEventListener("click", () => {
+      if (state.step !== 4) return;
+
+      if (fwIsRunning) {
+        stopFireworks();
+        toast("已停止煙花");
+      } else {
+        startFireworks(FINAL_FW_SECONDS);
+        if (fwAutoStopTimer) clearTimeout(fwAutoStopTimer);
+        fwAutoStopTimer = setTimeout(() => stopFireworks(), (FINAL_FW_SECONDS * 1000) + 400);
+        toast("已開始煙花（30 秒）");
+      }
+    });
+  }
 
   // =========================
   // Restore from saved state
@@ -1298,8 +1351,10 @@
       setDrawModeLabel();
     }
 
+    // ✅ If already at final, follow 30s rule (not Infinity)
     if (state.step === 4) {
       $("#finalCount").textContent = state.done.length;
+
       const ul = $("#finalList");
       ul.innerHTML = "";
       state.done.forEach((d) => {
@@ -1307,7 +1362,16 @@
         li.textContent = `${d.picker} ➜ ${d.giftOwner}`;
         ul.appendChild(li);
       });
-      startFireworks(Infinity);
+
+      startFireworks(FINAL_FW_SECONDS);
+      if (fwAutoStopTimer) clearTimeout(fwAutoStopTimer);
+      fwAutoStopTimer = setTimeout(() => stopFireworks(), (FINAL_FW_SECONDS * 1000) + 400);
+
+      setFireworksButtonLabel();
+    } else {
+      // ensure label consistent even outside final
+      fwIsRunning = false;
+      setFireworksButtonLabel();
     }
 
     $("#btnSpin").disabled = !(state.step === 3 && !!state.round.currentPicker && state.round.status === "idle");

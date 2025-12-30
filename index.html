@@ -235,9 +235,13 @@
       <div class="hd">
         <div>
           <h2>🎁 最終交換禮物名單</h2>
-          <div class="sub">（以下為最終結果；煙花會一直播放）</div>
+          <div class="sub">（以下為最終結果；煙花預設播放 30 秒，可手動停止/開始）</div>
         </div>
-        <span class="pill"><span class="muted">完成</span> <b id="finalCount">0</b></span>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="pill"><span class="muted">完成</span> <b id="finalCount">0</b></span>
+          <button class="btn warn" id="btnToggleFireworks" type="button">停止煙花</button>
+        </div>
       </div>
 
       <div class="bd">
